@@ -179,7 +179,7 @@ export default function DashboardPage() {
   )
 }
 
-export function StageBadge({ stage, raw }: { stage: string | null; raw: string | null }) {
+function StageBadge({ stage, raw }: { stage: string | null; raw: string | null }) {
   const meta = stage ? STAGE_META[stage] : null
   if (!meta) return <span className="badge badge-none" title={raw || ''}>—</span>
   return <span className={`badge badge-${stage}`} title={raw || ''}>{meta.label}</span>
