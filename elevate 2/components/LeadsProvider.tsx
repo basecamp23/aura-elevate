@@ -22,6 +22,10 @@ export interface Lead {
   source_property: string
   age_range: string
   comments: string
+  fbc: string
+  fbclid: string
+  fbp: string
+  meta_assisted: boolean
   ghl_status: string | null
   ghl_stage: string | null
 }
@@ -58,6 +62,8 @@ export function LeadsProvider({ children, userEmail }: { children: ReactNode; us
 
   const mapRow = useCallback((row: any, ghlM: Record<string, GHLRow>): Lead => {
     const ghl = ghlM[normEmail(row.email)] || null
+    const src = inferSource(row)
+    const metaAssisted = src === 'ig_assisted' || src === 'fb_assisted'
     return {
       id: row.id,
       email: normEmail(row.email),
@@ -68,7 +74,7 @@ export function LeadsProvider({ children, userEmail }: { children: ReactNode; us
       procedure: row.procedure_interest || '',
       disposition: row.disposition || '',
       consultation_status: row.consultation_status || '',
-      source: inferSource(row),
+      source: src,
       campaign: row.utm_campaign || '',
       content: row.utm_content || '',
       medium: row.utm_medium || '',
@@ -77,6 +83,10 @@ export function LeadsProvider({ children, userEmail }: { children: ReactNode; us
       source_property: row.source_property || '',
       age_range: row.age_range || '',
       comments: row.comments || '',
+      fbc: row.fbc || '',
+      fbclid: row.fbclid || '',
+      fbp: row.fbp || '',
+      meta_assisted: metaAssisted,
       ghl_status: ghl ? ghl.status : null,
       ghl_stage: ghl ? mapGHLStage(ghl.status, ghl.tags) : null,
     }
@@ -88,8 +98,8 @@ export function LeadsProvider({ children, userEmail }: { children: ReactNode; us
     try {
       let rows: any[] = [], from = 0
       while (true) {
-        const { data, error } = await sb.from('ceremony')
-          .select('id,created_at,first_name,last_name,email,primary_phone,zip_code,procedure_interest,landing_page,utm_source,utm_medium,utm_campaign,utm_content,disposition,consultation_status,source_property,age_range,comments')
+        const { data, error } = await sb.from('aura_ceremony')
+          .select('id,created_at,first_name,last_name,email,primary_phone,zip_code,procedure_interest,landing_page,utm_source,utm_medium,utm_campaign,utm_content,disposition,consultation_status,source_property,age_range,comments,fbc,fbclid,fbp')
           .order('created_at', { ascending: false })
           .range(from, from + 999)
         if (error) throw error
